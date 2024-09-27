@@ -1,0 +1,17 @@
+
+#video-player {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 1000px;
+}
+
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 1000px;
+  /* background-color: black; */
+}
