@@ -3,14 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="public/spotlight.svg">
     <link rel="stylesheet" href="src/style.css">
-    <title>Vite + TS</title>
+    <title>Spotlight</title>
     <script src="src/main.js"></script>
   </head>
   <body>
+    <button id="start-button" onclick="startVideo()">Start</button>
     <video id="video-player">
-      <source src="/home/jure/Videos/Screencasts/Screencast_20240925_151417.webm" type="video/webm" />
+      <source src="public/Screencast_20240925_151417.webm" type="video/webm" />
     </video>
     <canvas id="canvas" width="800" height="1000"></canvas>
+    <div id="done-display">Done</div>
   </body>
 </html>

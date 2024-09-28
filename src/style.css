@@ -1,5 +1,10 @@
+html {
+  --primary-color: rgba(255, 251, 0, 0.74);
+  --primary-color-darker: rgba(255, 251, 0, 0.139);
+}
 
 #video-player {
+  visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -8,10 +13,43 @@
 }
 
 #canvas {
+  visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
   width: 800px;
   height: 1000px;
   /* background-color: black; */
+}
+
+#start-button {
+    background-color: var(--primary-color);
+    color: black;
+    border: none;
+    width: 100px;
+    height: 40px;
+    font-size: large;
+    border-bottom: 4px solid black;
+    border-right: 3px solid black;
+    border-radius: 12px;
+    padding: 7px 10px;
+    margin-top: 1px;
+    font-weight: bold;
+    margin-left: 8px;
+    margin-right: 8px;
+  
+    &:hover {
+      transform: translateY(-1px);
+      border-bottom: 4px solid black;
+    }
+  
+    &:active {
+      transform: translateY(2px) translateX(2px);
+      border: none;
+      margin-bottom: 3px;
+    }
+}
+
+#done-display {
+  display: none;
 }
