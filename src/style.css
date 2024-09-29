@@ -4,22 +4,17 @@ html {
 }
 
 #video-player {
-  visibility: hidden;
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
-  width: 640px;
-  height: 480px;
 }
 
 #canvas {
-  visibility: hidden;
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
-  width: 640px;
-  height: 480px;
-  /* background-color: black; */
 }
 
 #start-button {
