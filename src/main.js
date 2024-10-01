@@ -13,13 +13,17 @@ function init() {
     console.log("video dimensions: ", width, "x", height);
     canvas.width = width;
     canvas.height = height;
-  })
+  });
+  video.addEventListener("loadeddata", enableStartButton);
   canvas.addEventListener("click", saveScreenshot);
   document.getElementById("upload-video").addEventListener("change", uploadVideo, false);
 }
 
+function enableStartButton(event) {
+  document.getElementById("start-button").disabled = false;
+}
+
 function uploadVideo(event) {
-  console.log("Uploaded video ", document.getElementById("upload-video").files.length);
   const file = document.getElementById("upload-video").files[0];
   const video = document.getElementById("video-player");
   const fs = new FileReader();
@@ -116,8 +120,6 @@ function saveScreenshot(event) {
   frame.toBlob((blob) => {
     savedFrames.push(blob);
   });
-
-
 }
 
 function addImageToImagebox(imgbox, imgBlob, frameBlob, id) {
@@ -147,12 +149,14 @@ function addImageToImagebox(imgbox, imgBlob, frameBlob, id) {
 
 function startVideo() {
   console.log("start");
-  document.getElementById("canvas").style.display = "block";
-  document.getElementById("video-player").style.display = "block";
-  document.getElementById("start-button").style.display = "none";
-  document.getElementById("upload-video").style.display = "none";
-  document.getElementById("video-player").play();
-  document.onmousemove = handleMouseMove;
+  setTimeout(() => {
+    document.getElementById("canvas").style.display = "block";
+    document.getElementById("video-player").style.display = "block";
+    document.getElementById("start-button").style.display = "none";
+    document.getElementById("upload-video").style.display = "none";
+    document.getElementById("video-player").play();
+    document.onmousemove = handleMouseMove;
+  }, 100);
 }
 
 window.onload = init;
