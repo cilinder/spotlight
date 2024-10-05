@@ -1,0 +1,19 @@
+{
+  "name": "spotlight",
+  "version": "1.0.0",
+  "description": "Find the hidden person in video",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "spotlight",
+    "fun"
+  ],
+  "author": "Ajda Lampe & Jure Taslak",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cilinder/spotlight.git"
+  }
+}
