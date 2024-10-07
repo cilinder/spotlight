@@ -43,5 +43,37 @@ function startVideo() {
 </template>
 
 <style scoped lang="css">
+#start-button {
+  border-radius: 12px;
+  padding: 7px 10px;
+  margin-top: 1px;
+  font-weight: bold;
+  margin-left: 8px;
+  margin-right: 8px;
+  width: 100px;
+  height: 40px;
+  font-size: large;
+  color: black;
 
+  &:enabled {
+    background-color: var(--primary-color);
+    border: none;
+    border-bottom: 4px solid var(--primary-color-darker); 
+    border-right: 3px solid var(--primary-color-darker); 
+    &:hover {
+      transform: translateY(-1px);
+      border-bottom: 4px solid var(--primary-color-darker); 
+    }
+  
+    &:active {
+      transform: translateY(2px) translateX(2px);
+      border: none;
+      margin-bottom: 3px;
+    }
+  }
+
+  &:disabled {
+    background-color: var(--disabled-color);
+  }
+}
 </style>
