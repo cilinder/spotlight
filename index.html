@@ -1,20 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg" href="public/spotlight.svg">
-    <link rel="stylesheet" href="src/style.css">
-    <title>Spotlight</title>
-    <script src="src/main.js"></script>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
   </head>
   <body>
-    <button id="start-button" onclick="startVideo()" disabled>Start</button>
-    <input type="file" name="video" size="65" id="upload-video" />
-    <video id="video-player">
-      Your browser does not support HTML5 video.
-    </video>
-    <canvas id="canvas"></canvas>
-    <div id="done-display">Done</div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

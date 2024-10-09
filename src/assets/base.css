@@ -1,0 +1,5 @@
+:root {
+  --primary-color: rgba(255, 251, 0, 0.74);
+  --primary-color-darker: rgba(140, 140, 0, 0.8);
+  --disabled-color: rgba(113, 113, 113, 0.66);
+}
