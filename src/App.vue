@@ -1,11 +1,14 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import StartMenu from "./components/StartMenu.vue";
-import Results from "./components/Results.vue";
+import Results from "./components/ResultsPage.vue";
 
 let savedOverlays: Blob[] = [];
 let savedFrames: Blob[] = [];
+let timestamps: number[] = [];
+
+const screenshots: {overlay: Blob, frame: Blob, timestamp: number}[] = reactive([]);
 
 const showVideo = ref(false);
 const showStartMenu = ref(true);
@@ -27,6 +30,13 @@ const width = ref(0);
 const spotlightRadius = ref(50);
 
 function handleVideoEnded(event: any) {
+  for (let i = 0; i < savedOverlays.length; i++) {
+    screenshots.push({
+      overlay: savedOverlays[i],
+      frame: savedFrames[i],
+      timestamp: timestamps[i]
+    });
+  }
   showResults.value = true;
   showVideo.value = false;
 }
@@ -93,6 +103,8 @@ function saveScreenshot(event: MouseEvent) {
   frame.toBlob((blob) => {
     if (blob) savedFrames.push(blob);
   });
+
+  timestamps.push(videoPlayer.value.currentTime);
 }
 
 function loadVideo(videoFile: File) {
@@ -148,7 +160,7 @@ function startVideo() {
     @click="saveScreenshot"
   >
   </canvas>
-  <Results v-if="showResults" :savedOverlays="savedOverlays" :savedFrames="savedFrames" />
+  <Results v-if="showResults" :screenshots="screenshots"/>
 </template>
 
 <style scoped>
