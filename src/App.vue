@@ -1,8 +1,9 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import StartMenu from "./components/StartMenu.vue";
-import Results from "./components/ResultsPage.vue";
+import MainMenu from "./components/MainMenu.vue";
+// import StartMenu from "./components/StartMenu.vue";
+// import Results from "./components/ResultsPage.vue";
 
 let savedOverlays: Blob[] = [];
 let savedFrames: Blob[] = [];
@@ -138,7 +139,8 @@ function startVideo() {
 </script>
 
 <template>
-  <StartMenu v-if="showStartMenu" :onClick="startVideo" @load="loadVideo" @start="startVideo" />
+  <MainMenu />
+  <!-- <StartMenu v-if="showStartMenu" :onClick="startVideo" @load="loadVideo" @start="startVideo" />
   <video
     v-if="showVideo"
     ref="videoPlayer"
@@ -160,7 +162,7 @@ function startVideo() {
     @click="saveScreenshot"
   >
   </canvas>
-  <Results v-if="showResults" :screenshots="screenshots"/>
+  <Results v-if="showResults" :screenshots="screenshots"/> -->
 </template>
 
 <style scoped>

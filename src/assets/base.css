@@ -3,3 +3,12 @@
   --primary-color-darker: rgba(140, 140, 0, 0.8);
   --disabled-color: rgba(113, 113, 113, 0.66);
 }
+
+body {
+  margin: 0;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+}
