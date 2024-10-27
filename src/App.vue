@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import MainMenu from "./components/MainMenu.vue";
+import LevelCreator from "./components/LevelCreator.vue";
 // import StartMenu from "./components/StartMenu.vue";
 // import Results from "./components/ResultsPage.vue";
 
@@ -139,7 +140,8 @@ function startVideo() {
 </script>
 
 <template>
-  <MainMenu />
+  <!-- <MainMenu /> -->
+  <LevelCreator />
   <!-- <StartMenu v-if="showStartMenu" :onClick="startVideo" @load="loadVideo" @start="startVideo" />
   <video
     v-if="showVideo"

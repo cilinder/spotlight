@@ -1,4 +1,10 @@
 <script setup lang="ts">
+const emit = defineEmits<{
+  create: [],
+  load: [],
+  exit: [],
+}>();
+
 
 </script>
 
@@ -8,9 +14,9 @@
         <div class="title">
             <img src="/logo.png" alt="spotlight logo" class="logo">
         </div>
-        <button>Create</button>
-        <button>Load</button>
-        <button>Exit</button>
+        <button @click="emit('create')">Create</button>
+        <button @click="emit('load')">Load</button>
+        <button @click="emit('exit')">Exit</button>
     </div>
 </div>
 </template>
