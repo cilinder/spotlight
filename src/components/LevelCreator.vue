@@ -1,19 +1,48 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+
+type Point = {
+  id : number;
+  x : number;
+  y : number;
+  timestamp : number;
+};
 
 const videoLoaded = ref(false);
 const src = ref<any>("");
 const videoUpload = ref<HTMLInputElement|null>(null);
 const videoContainer = ref<HTMLElement | null>(null);
 const videoPlayer = ref<HTMLVideoElement | null>(null);
+const canvas = ref<HTMLCanvasElement | null>(null);
+const ctx = computed(() => {
+  return canvas.value ? canvas.value.getContext("2d") : null;
+})
+
 const videoHeight = ref(0);
 const videoWidth = ref(0);
 const ratio = ref(0);
+const videoTop = computed(() => {
+  return videoPlayer.value ? videoPlayer.value.getBoundingClientRect().top : 0; 
+});
+const videoLeft = computed(() => {
+  return videoPlayer.value ? videoPlayer.value.getBoundingClientRect().left : 0; 
+});
 
 const currentTime = ref(0);
 const videoDuration = ref(0);
 
-const slider = ref(0);
+const videoSlider = ref(0);
+const lightRadius = ref(0);
+
+const addingPoint = ref(false);
+const cursorType = computed(() => {return addingPoint.value ? "crosshair" : "default"})
+
+const points = ref<Point[]>([]);
+let _uuid = 0;
+
+function uuid() {
+  return _uuid++;
+}
 
 function uploadVideo(event: Event) {
   if (videoUpload.value && videoUpload.value.files) {
@@ -35,10 +64,7 @@ function uploadVideo(event: Event) {
 function readMetadata(event: Event) {
   if (videoPlayer.value) {
     videoDuration.value = videoPlayer.value?.duration;
-    // videoHeight.value = videoPlayer.value.videoHeight;
-    console.log(videoPlayer.value.videoHeight, videoPlayer.value.videoWidth);
     ratio.value = videoPlayer.value.videoWidth / videoPlayer.value.videoHeight;
-    console.log("Ratio: ", ratio.value);
 
     if (videoContainer.value) {
       videoWidth.value = videoContainer.value.getBoundingClientRect().width;
@@ -49,21 +75,55 @@ function readMetadata(event: Event) {
 
 function setFrame(event: Event) {
   if (videoPlayer.value) {
-    videoPlayer.value.currentTime = slider.value;
+    videoPlayer.value.currentTime = videoSlider.value;
   }
 }
 
 function addPoint() {
-
+  addingPoint.value = true;
+  console.log(addingPoint.value, cursorType.value);
 }
 
 function handleClickCanvas(event: MouseEvent) {
-  const x = event.clientX;
-  const y = event.clientY;
-  console.log("Canvas: ", x, y);
-  console.log("Video player: ", videoPlayer.value?.getBoundingClientRect());
+  console.log(addingPoint.value);
+  if (addingPoint.value && videoPlayer.value) {
+    const x = event.clientX;
+    const y = event.clientY;
+    const xNorm = Math.max(Math.min((x - videoLeft.value) / videoWidth.value, 1), 0);
+    const yNorm = Math.max(Math.min((y - videoTop.value) / videoHeight.value, 1), 0);
+    points.value.push({id: uuid(), x: xNorm, y: yNorm, timestamp: videoPlayer.value.currentTime});
+    addingPoint.value = false;
+    drawPoints();
+  }
 }
 
+function drawCross(x: number, y: number, ctx: CanvasRenderingContext2D) {
+  ctx.beginPath();
+  ctx.strokeStyle = "red";
+  ctx.moveTo(x-5, y-5);
+  ctx.lineTo(x+5, y+5);
+  ctx.moveTo(x-5, y+5);
+  ctx.lineTo(x+5, y-5);
+  ctx.stroke();
+}
+
+function drawCircle(x: number, y: number, r: number, ctx: CanvasRenderingContext2D) {
+  ctx.beginPath();
+  ctx.strokeStyle = "black";
+  ctx.arc(x, y, 50, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawPoints() {
+  if (ctx.value) {
+    for (const pt of points.value) {
+      const x = (pt.x * videoWidth.value);
+      const y = (pt.y * videoHeight.value);
+      drawCross(x, y, ctx.value);
+      drawCircle(x, y, 50, ctx.value);
+    }
+  }
+}
 
 const formatter = new Intl.NumberFormat("en-US", {minimumIntegerDigits: 2})
 function formatTime(time: number) {
@@ -116,7 +176,9 @@ addEventListener("resize", () => {
             <canvas
               ref="canvas"
               id="canvas"
-              :style="{ height: `${videoHeight}px`, width: `${videoWidth}px`}"
+              :width="videoWidth"
+              :height="videoHeight"
+              :style="{ height: `${videoHeight}px`, width: `${videoWidth}px`, cursor: `${cursorType}`}"
               @click="handleClickCanvas"
             >
             </canvas>
@@ -126,12 +188,16 @@ addEventListener("resize", () => {
 
       <div class="time-control-container">
         <div class="timestamp">{{ formatTime(currentTime) }}</div>
-        <input class="slider" type="range" min="0" :max="videoDuration" step="any" v-model="slider" @mouseup="setFrame">
+        <input class="videoSlider" type="range" min="0" :max="videoDuration" step="any" v-model="videoSlider" @mouseup="setFrame">
         <div class="timestamp">{{ formatTime(videoDuration) }}</div>
       </div>
     </div>
     
     <div class="editing-container">
+      <div>
+        <label>Light radius</label>
+        <input class="radiusPicker" type="range" min="0" max="1" step="any" v-model="lightRadius">
+      </div>
       <button @click="addPoint" id="add-point" :disabled="!videoLoaded">Add point</button>
       
     </div>
@@ -180,7 +246,8 @@ addEventListener("resize", () => {
   width: 40%;
   height: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1em;
 }
 
 #upload-video {
@@ -189,17 +256,14 @@ addEventListener("resize", () => {
 
 video {
   width: 100%;
-  /* height: 100%; */
 }
 
 #canvas {
-  width: 60%;
   position: absolute;
-  /* height: 480px; */
   left: 0;
 }
 
-.slider {
+.videoSlider {
   width: 80%;
 }
 
