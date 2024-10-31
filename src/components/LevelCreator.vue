@@ -4,8 +4,11 @@ import { ref } from 'vue';
 const videoLoaded = ref(false);
 const src = ref<any>("");
 const videoUpload = ref<HTMLInputElement|null>(null);
+const videoContainer = ref<HTMLElement | null>(null);
 const videoPlayer = ref<HTMLVideoElement | null>(null);
 const videoHeight = ref(0);
+const videoWidth = ref(0);
+const ratio = ref(0);
 
 const currentTime = ref(0);
 const videoDuration = ref(0);
@@ -32,8 +35,15 @@ function uploadVideo(event: Event) {
 function readMetadata(event: Event) {
   if (videoPlayer.value) {
     videoDuration.value = videoPlayer.value?.duration;
-    videoHeight.value = videoPlayer.value.videoHeight;
-    console.log(videoPlayer.value.videoHeight);
+    // videoHeight.value = videoPlayer.value.videoHeight;
+    console.log(videoPlayer.value.videoHeight, videoPlayer.value.videoWidth);
+    ratio.value = videoPlayer.value.videoWidth / videoPlayer.value.videoHeight;
+    console.log("Ratio: ", ratio.value);
+
+    if (videoContainer.value) {
+      videoWidth.value = videoContainer.value.getBoundingClientRect().width;
+      videoHeight.value = videoWidth.value / ratio.value;
+    }
   }
 }
 
@@ -47,9 +57,13 @@ function addPoint() {
 
 }
 
-function handleClickCanvas() {
-  console.log("Canvas")
+function handleClickCanvas(event: MouseEvent) {
+  const x = event.clientX;
+  const y = event.clientY;
+  console.log("Canvas: ", x, y);
+  console.log("Video player: ", videoPlayer.value?.getBoundingClientRect());
 }
+
 
 const formatter = new Intl.NumberFormat("en-US", {minimumIntegerDigits: 2})
 function formatTime(time: number) {
@@ -63,12 +77,22 @@ function formatTime(time: number) {
     return `${formatter.format(minutes)}:${formatter.format(seconds)}`;
   }
 }
+
+// We have to adjust the size of the video and canvas when the window size changes
+// otherwise the video has a fixed size forever and it looks wierd
+addEventListener("resize", () => {
+  if (videoContainer.value) {
+    videoWidth.value = videoContainer.value.getBoundingClientRect().width;
+    videoHeight.value = videoWidth.value / ratio.value;
+  }
+});
+
 </script>
 
 <template>
   <div class="container">
     <div class="video-control-container">
-      <div class="video-container">
+      <div class="video-container" ref="videoContainer">
         <input 
           v-if="!videoLoaded"
           type="file"
@@ -79,21 +103,24 @@ function formatTime(time: number) {
           @change="uploadVideo"
         />
         <template v-else>
-          <video 
-            ref="videoPlayer"
-            :key="src"
-            @loadedmetadata="readMetadata"
-          >
-            <source :src="src" />
-            Your browser does not support HTML5 video.
-          </video>
-          <canvas
-            ref="canvas"
-            id="canvas"
-            :height="videoHeight"
-            @click="handleClickCanvas"
-          >
-          </canvas>
+          <div >
+            <video 
+              ref="videoPlayer"
+              :key="src"
+              :style="{ height: `${videoHeight}px`, width: `${videoWidth}px`}"
+              @loadedmetadata="readMetadata"
+            >
+              <source :src="src" />
+              Your browser does not support HTML5 video.
+            </video>
+            <canvas
+              ref="canvas"
+              id="canvas"
+              :style="{ height: `${videoHeight}px`, width: `${videoWidth}px`}"
+              @click="handleClickCanvas"
+            >
+            </canvas>
+          </div>
         </template>
       </div>
 
@@ -162,12 +189,13 @@ function formatTime(time: number) {
 
 video {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
 }
 
 #canvas {
   width: 60%;
   position: absolute;
+  /* height: 480px; */
   left: 0;
 }
 
