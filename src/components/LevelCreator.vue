@@ -32,13 +32,30 @@ const currentTime = ref(0);
 const videoDuration = ref(0);
 
 const videoSlider = ref(0);
-const lightRadius = ref(0);
+const radiusSlider = ref(0.5);
+const lightRadius = computed(() => {
+  return Math.min(videoWidth.value, videoHeight.value) * 0.2 * radiusSlider.value;
+})
 
 const addingPoint = ref(false);
 const cursorType = computed(() => {return addingPoint.value ? "crosshair" : "default"})
 
-const points = ref<Point[]>([]);
+const points = ref<Point[][]>([]);
+const currentPoints = computed(() => {
+  let pts = [];
+  if (videoPlayer.value) {
+    for (const idpts of points.value) {
+      for (const pt of idpts) {
+        if (pt.timestamp <= currentTime.value) {
+          pts.push(pt)
+        }
+      }
+    }
+  }
+  return pts;
+})
 let _uuid = 0;
+const selectedPoint = ref<number|null>(null);
 
 function uuid() {
   return _uuid++;
@@ -76,12 +93,19 @@ function readMetadata(event: Event) {
 function setFrame(event: Event) {
   if (videoPlayer.value) {
     videoPlayer.value.currentTime = videoSlider.value;
+    currentTime.value = videoSlider.value;
+    redrawPoints();
+    selectedPoint.value = null;
   }
 }
 
 function addPoint() {
   addingPoint.value = true;
   console.log(addingPoint.value, cursorType.value);
+}
+
+function selectPoint(id: number) {
+  selectedPoint.value = id;
 }
 
 function handleClickCanvas(event: MouseEvent) {
@@ -91,9 +115,9 @@ function handleClickCanvas(event: MouseEvent) {
     const y = event.clientY;
     const xNorm = Math.max(Math.min((x - videoLeft.value) / videoWidth.value, 1), 0);
     const yNorm = Math.max(Math.min((y - videoTop.value) / videoHeight.value, 1), 0);
-    points.value.push({id: uuid(), x: xNorm, y: yNorm, timestamp: videoPlayer.value.currentTime});
+    points.value.push([{id: uuid(), x: xNorm, y: yNorm, timestamp: videoPlayer.value.currentTime}]);
     addingPoint.value = false;
-    drawPoints();
+    redrawPoints();
   }
 }
 
@@ -110,18 +134,25 @@ function drawCross(x: number, y: number, ctx: CanvasRenderingContext2D) {
 function drawCircle(x: number, y: number, r: number, ctx: CanvasRenderingContext2D) {
   ctx.beginPath();
   ctx.strokeStyle = "black";
-  ctx.arc(x, y, 50, 0, Math.PI * 2);
+  ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.stroke();
 }
 
-function drawPoints() {
-  if (ctx.value) {
-    for (const pt of points.value) {
+function redrawPoints() {
+  if (ctx.value && videoPlayer.value) {
+    clearCanvas();
+    for (const pt of currentPoints.value) {
       const x = (pt.x * videoWidth.value);
       const y = (pt.y * videoHeight.value);
       drawCross(x, y, ctx.value);
-      drawCircle(x, y, 50, ctx.value);
+      drawCircle(x, y, lightRadius.value, ctx.value);
     }
+  }
+}
+
+function clearCanvas() {
+  if (ctx.value) {
+    ctx.value.clearRect(0, 0, videoWidth.value, videoHeight.value);
   }
 }
 
@@ -196,9 +227,24 @@ addEventListener("resize", () => {
     <div class="editing-container">
       <div>
         <label>Light radius</label>
-        <input class="radiusPicker" type="range" min="0" max="1" step="any" v-model="lightRadius">
+        <input class="radiusPicker" type="range" min="0" max="1" step="any" v-model="radiusSlider" @mouseup="redrawPoints">
       </div>
-      <button @click="addPoint" id="add-point" :disabled="!videoLoaded">Add point</button>
+      <button id="add-point" 
+        :disabled="!videoLoaded || selectedPoint != null" 
+        @click="addPoint" 
+      >
+        Add point
+      </button>
+      <div class="points-container">
+        <div v-for="pt in currentPoints" :key="pt.id" 
+          class="point" :class="{ selected: selectedPoint == pt.id }"
+        >
+          {{ pt.id }} <button @click="selectPoint(pt.id)">Edit</button>
+        </div>
+      </div>
+      <button v-if="selectedPoint != null" class="cancel-button" @click="() => {selectedPoint=null}">
+        Cancel editing
+      </button>
       
     </div>
   </div>
@@ -269,6 +315,38 @@ video {
 
 #add-point {
   height: 2em;
+}
+
+.points-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin-left: 1em;
+  margin-right: 1em;
+  align-items: center;
+}
+
+.point {
+  border: 1px solid gray;
+  border-radius: 5px;
+  font-size: 3ex;
+  padding-left: 10px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  width: 50%;
+}
+
+.selected {
+  border: 3px solid rgb(0, 128, 0);
+  background-color: rgba(0, 128, 0, 0.3);
+}
+
+.cancel-button {
+  background-color: rgb(171, 0, 0);
+  color: white;
+  width: 10em;
+  padding: 5px;
+  align-self: center;
 }
 
 </style>
