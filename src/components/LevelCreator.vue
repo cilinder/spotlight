@@ -8,6 +8,8 @@ type Point = {
   timestamp : number;
 };
 
+type Mode = "Not loaded" | "Normal" | "Adding point" | "Editing point";
+
 const videoLoaded = ref(false);
 const src = ref<any>("");
 const videoUpload = ref<HTMLInputElement|null>(null);
@@ -17,7 +19,6 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 const ctx = computed(() => {
   return canvas.value ? canvas.value.getContext("2d") : null;
 })
-
 const videoHeight = ref(0);
 const videoWidth = ref(0);
 const ratio = ref(0);
@@ -27,19 +28,14 @@ const videoTop = computed(() => {
 const videoLeft = computed(() => {
   return videoPlayer.value ? videoPlayer.value.getBoundingClientRect().left : 0; 
 });
-
 const currentTime = ref(0);
 const videoDuration = ref(0);
-
-const videoSlider = ref(0);
 const radiusSlider = ref(0.5);
 const lightRadius = computed(() => {
   return Math.min(videoWidth.value, videoHeight.value) * 0.2 * radiusSlider.value;
 })
-
 const addingPoint = ref(false);
 const cursorType = computed(() => {return addingPoint.value ? "crosshair" : "default"})
-
 const points = ref<Point[][]>([]);
 const currentPoints = computed(() => {
   let pts = [];
@@ -53,10 +49,21 @@ const currentPoints = computed(() => {
     }
   }
   return pts;
+});
+
+const currentMode = computed<Mode>(() => {
+  if (!videoLoaded.value) {
+    return "Not loaded";
+  } else if (addingPoint.value) {
+    return "Adding point";
+  } else if (selectedPoint.value != null) {
+    return "Editing point";
+  }
+  return "Normal";
 })
+
 let _uuid = 0;
 const selectedPoint = ref<number|null>(null);
-
 function uuid() {
   return _uuid++;
 }
@@ -92,8 +99,6 @@ function readMetadata(event: Event) {
 
 function setFrame(event: Event) {
   if (videoPlayer.value) {
-    videoPlayer.value.currentTime = videoSlider.value;
-    currentTime.value = videoSlider.value;
     redrawPoints();
     selectedPoint.value = null;
   }
@@ -101,7 +106,6 @@ function setFrame(event: Event) {
 
 function addPoint() {
   addingPoint.value = true;
-  console.log(addingPoint.value, cursorType.value);
 }
 
 function selectPoint(id: number) {
@@ -200,6 +204,7 @@ addEventListener("resize", () => {
               :key="src"
               :style="{ height: `${videoHeight}px`, width: `${videoWidth}px`}"
               @loadedmetadata="readMetadata"
+              :currentTime="currentTime"
             >
               <source :src="src" />
               Your browser does not support HTML5 video.
@@ -219,18 +224,18 @@ addEventListener("resize", () => {
 
       <div class="time-control-container">
         <div class="timestamp">{{ formatTime(currentTime) }}</div>
-        <input class="videoSlider" type="range" min="0" :max="videoDuration" step="any" v-model="videoSlider" @mouseup="setFrame">
+        <input class="videoSlider" type="range" min="0" :max="videoDuration" step="any" v-model="currentTime" @input="setFrame">
         <div class="timestamp">{{ formatTime(videoDuration) }}</div>
       </div>
     </div>
     
     <div class="editing-container">
-      <div>
-        <label>Light radius</label>
-        <input class="radiusPicker" type="range" min="0" max="1" step="any" v-model="radiusSlider" @mouseup="redrawPoints">
+      <div class="radius-picker-container">
+        <label :style="{ paddingBottom: '3px' }">Light radius</label>
+        <input class="radius-picker" type="range" min="0" max="1" step="any" v-model="radiusSlider" @input="redrawPoints">
       </div>
       <button id="add-point" 
-        :disabled="!videoLoaded || selectedPoint != null" 
+        :disabled="currentMode != 'Normal'" 
         @click="addPoint" 
       >
         Add point
@@ -239,10 +244,10 @@ addEventListener("resize", () => {
         <div v-for="pt in currentPoints" :key="pt.id" 
           class="point" :class="{ selected: selectedPoint == pt.id }"
         >
-          {{ pt.id }} <button @click="selectPoint(pt.id)">Edit</button>
+          {{ pt.id }} <button v-if="currentMode != 'Adding point'" @click="selectPoint(pt.id)">Edit</button>
         </div>
       </div>
-      <button v-if="selectedPoint != null" class="cancel-button" @click="() => {selectedPoint=null}">
+      <button v-if="currentMode == 'Editing point'" class="cancel-button" @click="() => {selectedPoint=null}">
         Cancel editing
       </button>
       
@@ -294,6 +299,48 @@ addEventListener("resize", () => {
   display: flex;
   flex-direction: column;
   gap: 1em;
+}
+
+.radius-picker-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 1em;
+  padding-top: 7px;
+  gap: 1em;
+}
+
+#add-point {
+  align-self: center;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-bottom: 3px solid var(--primary-color-darker);
+  border-right: 2px solid var(--primary-color-darker);
+  border-radius: 12px;
+  padding: 7px 10px;
+  margin-top: 1px;
+  font-weight: bold;
+  margin-left: 8px;
+  margin-right: 8px;
+  line-height: 5px;
+
+  &:enabled:hover {
+    transform: translateY(-1px);
+    border-bottom: 4px solid var(--primary-color-darker);
+  }
+
+  &:enabled:active {
+    transform: translateY(2px) translateX(2px);
+    border: none;
+    margin-bottom: 3px;
+  }
+
+  &:disabled {
+    background-color: var(--disabled-color);
+    color: white;
+    border: none;
+  }
 }
 
 #upload-video {
