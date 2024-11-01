@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import Button from './Button.vue';
 
 type Point = {
   id : number;
@@ -234,12 +235,20 @@ addEventListener("resize", () => {
         <label :style="{ paddingBottom: '3px' }">Light radius</label>
         <input class="radius-picker" type="range" min="0" max="1" step="any" v-model="radiusSlider" @input="redrawPoints">
       </div>
-      <button id="add-point" 
+      <!-- <button id="add-point" 
         :disabled="currentMode != 'Normal'" 
         @click="addPoint" 
       >
         Add point
-      </button>
+      </button> -->
+      <Button
+        :type="'default'"
+        :style="{ alignSelf: 'center' }"
+        :disabled="currentMode != 'Normal'" 
+        @click="addPoint" 
+      >
+        Add point
+      </Button>
       <div class="points-container">
         <div v-for="pt in currentPoints" :key="pt.id" 
           class="point" :class="{ selected: selectedPoint == pt.id }"

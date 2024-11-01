@@ -1,10 +1,13 @@
 :root {
-  --primary-color: #006F9B;
-  --primary-color-darker: #004966;
-  --primary-color-lighter: #00b7ff;
-  --primary-color-light: #99e2ff;
-  --primary-color-lightest: #ccf1ff;
+  --primary-color: rgb(0, 111, 155);
+  --primary-color-darker: rgb(0, 73, 102);
+  --primary-color-lighter: rgb(0, 183, 255);
+  --primary-color-light: rgb(153, 226, 255);
+  --primary-color-lightest: rgb(204, 241, 255);
   --disabled-color: rgba(113, 113, 113, 0.66);
+  --cancel-color: rgb(173, 17, 17);
+  --cancel-color-darker: rgb(117, 14, 14);
+  --cancel-color-lighter: rgb(219, 39, 39);
 }
 
 body {
