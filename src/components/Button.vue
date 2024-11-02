@@ -12,6 +12,8 @@ const {type = "default", disabled = false} = defineProps<{
   <button id="button" 
     :class="{ default: type == 'default', cancel: type == 'cancel'}"
     @click="$emit('click')"
+    @mouseenter="$emit('mouseenter')"
+    @mouseleave="$emit('mouseleave')"
     :disabled="disabled"
   >
     <slot></slot>
@@ -33,6 +35,7 @@ const {type = "default", disabled = false} = defineProps<{
 
   &:enabled:hover {
     transform: translateY(-1px) translateX(-1px);
+    margin-bottom: -1px;
   }
 
 

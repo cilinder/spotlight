@@ -113,12 +113,33 @@ function cancelAddingPoint() {
   addingPoint.value = false;
 }
 
-function selectPoint(id: number) {
-  selectedPoint.value = id;
+function selectPoint(point: Point) {
+  selectedPoint.value = point.id;
+  redrawPoints();
+  highlightPoint(point);
 }
 
 function cancelEditingPoint() {
   selectedPoint.value = null;
+  redrawPoints();
+}
+
+function highlightPoint(point: Point) {
+  if (ctx.value) {
+    drawPoint(point, "highlight", ctx.value)
+  }
+}
+
+function hoverHighlight(point: Point) {
+  if (currentMode.value != "Editing point") {
+    highlightPoint(point);
+  }
+}
+
+function hoverUnhighlight() {
+  if (currentMode.value != "Editing point") {
+    redrawPoints();
+  }
 }
 
 function handleClickCanvas(event: MouseEvent) {
@@ -134,9 +155,16 @@ function handleClickCanvas(event: MouseEvent) {
   }
 }
 
-function drawCross(x: number, y: number, ctx: CanvasRenderingContext2D) {
+function drawCross(x: number, y: number, style: string, ctx: CanvasRenderingContext2D) {
   ctx.beginPath();
-  ctx.strokeStyle = "red";
+  if (style == "highlight") {
+    ctx.strokeStyle = "green"
+    ctx.lineWidth = 2;
+  }
+  else {
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 1;
+  }
   ctx.moveTo(x-5, y-5);
   ctx.lineTo(x+5, y+5);
   ctx.moveTo(x-5, y+5);
@@ -144,21 +172,32 @@ function drawCross(x: number, y: number, ctx: CanvasRenderingContext2D) {
   ctx.stroke();
 }
 
-function drawCircle(x: number, y: number, r: number, ctx: CanvasRenderingContext2D) {
+function drawCircle(x: number, y: number, r: number, style: string, ctx: CanvasRenderingContext2D) {
+  if (style == "highlight") {
+    ctx.strokeStyle = "green"
+    ctx.lineWidth = 2;
+  }
+  else {
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+  }
   ctx.beginPath();
-  ctx.strokeStyle = "black";
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.stroke();
+}
+
+function drawPoint(point: Point, style: string, ctx: CanvasRenderingContext2D) {
+  const x = (point.x * videoWidth.value);
+  const y = (point.y * videoHeight.value);
+  drawCross(x, y, style, ctx);
+  drawCircle(x, y, lightRadius.value, style, ctx);
 }
 
 function redrawPoints() {
   if (ctx.value && videoPlayer.value) {
     clearCanvas();
     for (const pt of currentPoints.value) {
-      const x = (pt.x * videoWidth.value);
-      const y = (pt.y * videoHeight.value);
-      drawCross(x, y, ctx.value);
-      drawCircle(x, y, lightRadius.value, ctx.value);
+      drawPoint(pt, "normal", ctx.value);
     }
   }
 }
@@ -263,11 +302,13 @@ addEventListener("resize", () => {
       <div class="points-container">
         <div v-for="pt in currentPoints" :key="pt.id" 
           class="point" :class="{ selected: selectedPoint == pt.id }"
+          @mouseenter="hoverHighlight(pt)"
+          @mouseleave="hoverUnhighlight"
         >
           {{ pt.id }} 
           <Button 
             v-if="currentMode != 'Adding point'" 
-            @click="selectPoint(pt.id)"
+            @click="selectPoint(pt)"
           >
             Edit
           </Button>
@@ -369,11 +410,18 @@ video {
   padding-top: 3px;
   padding-bottom: 3px;
   width: 50%;
+  &:hover {
+    border: 2px solid var(--primary-color-lighter);
+    margin-bottom: -2px;
+    margin-top: -1px;
+  }
 }
 
 .selected {
   border: 3px solid rgb(0, 128, 0);
   background-color: rgba(0, 128, 0, 0.3);
+  margin-bottom: -2px;
+  margin-top: -2px;
 }
 
 .cancel-button {
