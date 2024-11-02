@@ -109,8 +109,16 @@ function addPoint() {
   addingPoint.value = true;
 }
 
+function cancelAddingPoint() {
+  addingPoint.value = false;
+}
+
 function selectPoint(id: number) {
   selectedPoint.value = id;
+}
+
+function cancelEditingPoint() {
+  selectedPoint.value = null;
 }
 
 function handleClickCanvas(event: MouseEvent) {
@@ -235,13 +243,8 @@ addEventListener("resize", () => {
         <label :style="{ paddingBottom: '3px' }">Light radius</label>
         <input class="radius-picker" type="range" min="0" max="1" step="any" v-model="radiusSlider" @input="redrawPoints">
       </div>
-      <!-- <button id="add-point" 
-        :disabled="currentMode != 'Normal'" 
-        @click="addPoint" 
-      >
-        Add point
-      </button> -->
       <Button
+        v-if="currentMode != 'Adding point'"
         :type="'default'"
         :style="{ alignSelf: 'center' }"
         :disabled="currentMode != 'Normal'" 
@@ -249,17 +252,34 @@ addEventListener("resize", () => {
       >
         Add point
       </Button>
+      <Button
+        v-if="currentMode == 'Adding point'"
+        :type="'cancel'"
+        :style="{ alignSelf: 'center' }"
+        @click="cancelAddingPoint" 
+      >
+        Cancel
+      </Button>
       <div class="points-container">
         <div v-for="pt in currentPoints" :key="pt.id" 
           class="point" :class="{ selected: selectedPoint == pt.id }"
         >
-          {{ pt.id }} <button v-if="currentMode != 'Adding point'" @click="selectPoint(pt.id)">Edit</button>
+          {{ pt.id }} 
+          <Button 
+            v-if="currentMode != 'Adding point'" 
+            @click="selectPoint(pt.id)"
+          >
+            Edit
+          </Button>
+          <Button
+            :type="'cancel'"
+            v-if="currentMode == 'Editing point' && pt.id == selectedPoint" 
+            @click="cancelEditingPoint"
+          >
+            Cancel
+          </Button>
         </div>
       </div>
-      <button v-if="currentMode == 'Editing point'" class="cancel-button" @click="() => {selectedPoint=null}">
-        Cancel editing
-      </button>
-      
     </div>
   </div>
 </template>
@@ -319,43 +339,6 @@ addEventListener("resize", () => {
   gap: 1em;
 }
 
-#add-point {
-  align-self: center;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-bottom: 3px solid var(--primary-color-darker);
-  border-right: 2px solid var(--primary-color-darker);
-  border-radius: 12px;
-  padding: 7px 10px;
-  margin-top: 1px;
-  font-weight: bold;
-  margin-left: 8px;
-  margin-right: 8px;
-  line-height: 5px;
-
-  &:enabled:hover {
-    transform: translateY(-1px);
-    border-bottom: 4px solid var(--primary-color-darker);
-  }
-
-  &:enabled:active {
-    transform: translateY(2px) translateX(2px);
-    border: none;
-    margin-bottom: 3px;
-  }
-
-  &:disabled {
-    background-color: var(--disabled-color);
-    color: white;
-    border: none;
-  }
-}
-
-#upload-video {
-
-}
-
 video {
   width: 100%;
 }
@@ -367,10 +350,6 @@ video {
 
 .videoSlider {
   width: 80%;
-}
-
-#add-point {
-  height: 2em;
 }
 
 .points-container {

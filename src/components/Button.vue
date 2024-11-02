@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
-const props = defineProps<{
-  type: "default" | "cancel",
-  disabled: boolean
+
+const {type = "default", disabled = false} = defineProps<{
+  type?: "default" | "cancel",
+  disabled?: boolean
 }>()
 
 </script>
@@ -11,7 +12,7 @@ const props = defineProps<{
   <button id="button" 
     :class="{ default: type == 'default', cancel: type == 'cancel'}"
     @click="$emit('click')"
-    :disabled="props.disabled"
+    :disabled="disabled"
   >
     <slot></slot>
   </button>
