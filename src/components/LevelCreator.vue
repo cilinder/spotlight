@@ -19,7 +19,8 @@ const videoPlayer = ref<HTMLVideoElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
 const ctx = computed(() => {
   return canvas.value ? canvas.value.getContext("2d") : null;
-})
+});
+
 const videoHeight = ref(0);
 const videoWidth = ref(0);
 const ratio = ref(0);
@@ -34,12 +35,12 @@ const videoDuration = ref(0);
 const radiusSlider = ref(0.5);
 const lightRadius = computed(() => {
   return Math.min(videoWidth.value, videoHeight.value) * 0.2 * radiusSlider.value;
-})
+});
 const addingPoint = ref(false);
 const cursorType = computed(() => {
   return currentMode.value == "Adding point" || currentMode.value == "Editing point" 
     ? "crosshair" : "default";
-})
+});
 const points = ref<Point[][]>([]);
 const currentPoints = computed(() => {
   let pts = [];
@@ -76,7 +77,7 @@ const currentMode = computed<Mode>(() => {
     return "Editing point";
   }
   return "Normal";
-})
+});
 
 let _uuid = 0;
 const selectedPoint = ref<number|null>(null);
@@ -141,7 +142,7 @@ function cancelEditingPoint() {
 
 function highlightPoint(point: Point) {
   if (ctx.value) {
-    drawPoint(point, "highlight", ctx.value)
+    drawPoint(point, "highlight", ctx.value);
   }
 }
 
@@ -170,7 +171,7 @@ function handleClickCanvas(event: MouseEvent) {
   }
   const {xNorm, yNorm} = normalizePoint(event.clientX, event.clientY);
   if (currentMode.value == "Adding point") {
-    const newPoint = {id: uuid(), x: xNorm, y: yNorm, timestamp: currentTime.value}
+    const newPoint = {id: uuid(), x: xNorm, y: yNorm, timestamp: currentTime.value};
     points.value.push([newPoint]);
     addingPoint.value = false;
   }
@@ -183,7 +184,7 @@ function handleClickCanvas(event: MouseEvent) {
     let i = 0;
     const insertIdx = points.value[pointId].findIndex((pt) => {
       return currentTime.value < pt.timestamp;
-    })
+    });
     if (insertIdx == -1) {
       points.value[pointId].push(point);
     }
@@ -198,7 +199,7 @@ function handleClickCanvas(event: MouseEvent) {
 function drawCross(x: number, y: number, style: string, ctx: CanvasRenderingContext2D) {
   ctx.beginPath();
   if (style == "highlight") {
-    ctx.strokeStyle = "green"
+    ctx.strokeStyle = "green";
     ctx.lineWidth = 2;
   }
   else {
@@ -214,7 +215,7 @@ function drawCross(x: number, y: number, style: string, ctx: CanvasRenderingCont
 
 function drawCircle(x: number, y: number, r: number, style: string, ctx: CanvasRenderingContext2D) {
   if (style == "highlight") {
-    ctx.strokeStyle = "green"
+    ctx.strokeStyle = "green";
     ctx.lineWidth = 2;
   }
   else {
@@ -248,7 +249,7 @@ function clearCanvas() {
   }
 }
 
-const formatter = new Intl.NumberFormat("en-US", {minimumIntegerDigits: 2})
+const formatter = new Intl.NumberFormat("en-US", {minimumIntegerDigits: 2});
 function formatTime(time: number) {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor(time % 3600 / 60);

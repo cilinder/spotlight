@@ -25,7 +25,7 @@ function startVideo() {
     emit('start');
   }
   else {
-    alert("Video not uploaded.")
+    alert("Video not uploaded.");
   }
 }
 </script>

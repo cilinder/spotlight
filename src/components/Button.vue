@@ -4,7 +4,7 @@
 const {type = "default", disabled = false} = defineProps<{
   type?: "default" | "cancel",
   disabled?: boolean
-}>()
+}>();
 
 </script>
 

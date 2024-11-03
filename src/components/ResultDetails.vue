@@ -7,7 +7,7 @@ const props = defineProps<{
         frame: Blob,
         timestamp: number,
     }
-}>()
+}>();
 
 const overlayURL = computed(() => URL.createObjectURL(props.screenshot.overlay));
 const frameURL = computed(() => URL.createObjectURL(props.screenshot.frame));

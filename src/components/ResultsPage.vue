@@ -4,11 +4,11 @@ import ResultDetails from "./ResultDetails.vue";
 
 const props = defineProps<{
     screenshots: {overlay: Blob, frame: Blob, timestamp: number}[]
-}>()
+}>();
 
 const screenshots = props.screenshots.map(({overlay, frame, timestamp}) => {
     return {overlay, frame, timestamp, overlayURL: URL.createObjectURL(overlay), frameURL: URL.createObjectURL(frame)};
-})
+});
 
 const revokeURL = URL.revokeObjectURL;
 
