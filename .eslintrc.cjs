@@ -14,6 +14,6 @@ module.exports = {
   },
   rules: {
     "vue/multi-word-component-names": "off",
-    "semi": [2, "always"]
+    "semi": [1, "always"]
   }
 };
