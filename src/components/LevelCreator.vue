@@ -13,7 +13,7 @@ type Mode = "Not loaded" | "Normal" | "Adding point" | "Editing point";
 
 const videoLoaded = ref(false);
 const src = ref<any>("");
-const videoUpload = ref<HTMLInputElement|null>(null);
+const videoUpload = ref<HTMLInputElement | null>(null);
 const videoContainer = ref<HTMLElement | null>(null);
 const videoPlayer = ref<HTMLVideoElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -36,16 +36,20 @@ const lightRadius = computed(() => {
   return Math.min(videoWidth.value, videoHeight.value) * 0.2 * radiusSlider.value;
 })
 const addingPoint = ref(false);
-const cursorType = computed(() => {return addingPoint.value ? "crosshair" : "default"})
+const cursorType = computed(() => {
+  return currentMode.value == "Adding point" || currentMode.value == "Editing point" 
+    ? "crosshair" : "default";
+})
 const points = ref<Point[][]>([]);
 const currentPoints = computed(() => {
   let pts = [];
   if (videoPlayer.value) {
     for (const idpts of points.value) {
-      for (const pt of idpts) {
-        if (pt.timestamp <= currentTime.value) {
-          pts.push(pt)
-        }
+      const pt = idpts.findLast((pt) => {
+        return pt.timestamp <= currentTime.value;
+      });
+      if (pt != undefined) {
+        pts.push(pt);
       }
     }
   }
@@ -142,17 +146,42 @@ function hoverUnhighlight() {
   }
 }
 
+function normalizePoint(x: number, y: number) {
+  const xNorm = Math.max(Math.min((x - videoLeft.value) / videoWidth.value, 1), 0);
+  const yNorm = Math.max(Math.min((y - videoTop.value) / videoHeight.value, 1), 0);
+  return {xNorm, yNorm};
+}
+
 function handleClickCanvas(event: MouseEvent) {
-  console.log(addingPoint.value);
-  if (addingPoint.value && videoPlayer.value) {
-    const x = event.clientX;
-    const y = event.clientY;
-    const xNorm = Math.max(Math.min((x - videoLeft.value) / videoWidth.value, 1), 0);
-    const yNorm = Math.max(Math.min((y - videoTop.value) / videoHeight.value, 1), 0);
-    points.value.push([{id: uuid(), x: xNorm, y: yNorm, timestamp: videoPlayer.value.currentTime}]);
-    addingPoint.value = false;
-    redrawPoints();
+  if (!videoPlayer.value) {
+    alert("Video not loaded");
+    return;
   }
+  const {xNorm, yNorm} = normalizePoint(event.clientX, event.clientY);
+  if (currentMode.value == "Adding point") {
+    const newPoint = {id: uuid(), x: xNorm, y: yNorm, timestamp: currentTime.value}
+    points.value.push([newPoint]);
+    addingPoint.value = false;
+  }
+  else if (currentMode.value == "Editing point") {
+    if (selectedPoint.value == null) {
+      return;
+    }
+    const pointId = selectedPoint.value;
+    const point = {id: pointId, x: xNorm, y: yNorm, timestamp: currentTime.value};
+    let i = 0;
+    const insertIdx = points.value[pointId].findIndex((pt) => {
+      return currentTime.value < pt.timestamp;
+    })
+    if (insertIdx == -1) {
+      points.value[pointId].push(point);
+    }
+    else {
+      points.value[pointId].splice(insertIdx, 0, point);
+    }
+    selectedPoint.value = null;
+  }
+  redrawPoints();
 }
 
 function drawCross(x: number, y: number, style: string, ctx: CanvasRenderingContext2D) {
@@ -412,8 +441,8 @@ video {
   width: 50%;
   &:hover {
     border: 2px solid var(--primary-color-lighter);
-    margin-bottom: -2px;
-    margin-top: -1px;
+    margin: -1px;
+
   }
 }
 
