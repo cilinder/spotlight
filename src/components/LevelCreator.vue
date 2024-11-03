@@ -43,18 +43,29 @@ const cursorType = computed(() => {
 const points = ref<Point[][]>([]);
 const currentPoints = computed(() => {
   let pts = [];
-  if (videoPlayer.value) {
-    for (const idpts of points.value) {
-      const pt = idpts.findLast((pt) => {
-        return pt.timestamp <= currentTime.value;
-      });
-      if (pt != undefined) {
-        pts.push(pt);
-      }
+  for (const idpts of points.value) {
+    const idx = idpts.findLastIndex((pt) => {
+      return pt.timestamp <= currentTime.value;
+    });
+    if (idx == idpts.length - 1) {
+      // no positions after currentTime => use last position
+      pts.push(idpts[idx]);
+    }
+    else if (idx >= 0) {
+      // use last position before and first position after currentTime to interpolate new point
+      const interpolatedPoint = interpolatePoints(idpts[idx], idpts[idx+1], currentTime.value);
+      pts.push(interpolatedPoint);
     }
   }
   return pts;
 });
+
+function interpolatePoints(pt1: Point, pt2: Point, t: number): Point {
+  const dt = (t - pt1.timestamp) / (pt2.timestamp - pt1.timestamp);
+  const x = (1 - dt) * pt1.x + dt * pt2.x;
+  const y = (1 - dt) * pt1.y + dt * pt2.y;
+  return {id: pt1.id, x: x, y: y, timestamp: t};
+}
 
 const currentMode = computed<Mode>(() => {
   if (!videoLoaded.value) {
