@@ -1,0 +1,20 @@
+:root {
+  --primary-color: rgb(0, 111, 155);
+  --primary-color-darker: rgb(0, 73, 102);
+  --primary-color-lighter: rgb(0, 183, 255);
+  --primary-color-light: rgb(153, 226, 255);
+  --primary-color-lightest: rgb(204, 241, 255);
+  --disabled-color: rgba(113, 113, 113, 0.66);
+  --cancel-color: rgb(173, 17, 17);
+  --cancel-color-darker: rgb(117, 14, 14);
+  --cancel-color-lighter: rgb(219, 39, 39);
+}
+
+body {
+  margin: 0;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+}
